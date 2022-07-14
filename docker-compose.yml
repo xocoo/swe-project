@@ -1,0 +1,69 @@
+# Docker Compose file Reference (https://docs.docker.com/compose/compose-file/)
+
+version: '3.7'
+
+# Define services
+services:
+  # Database Service (Mysql)
+  db:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    restart: always
+    container_name: ecommerce-db
+    environment:
+      MYSQL_DATABASE: ecommercedb
+      MYSQL_USER: ecommerce-db-sys
+      MYSQL_PASSWORD: test1234
+      MYSQL_ROOT_PASSWORD: nuuts
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - ecommerce-network
+  # App backend service
+  backend:
+    # Configuration for building the docker image for the backend service
+    build:
+      context: ./ecommerce-backend/ # Use an image built from the specified dockerfile in the directory.
+      dockerfile: Dockerfile
+    container_name: ecommerce-backend
+    ports:
+      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Pass environment variables to the service
+      SPRING_DATASOURCE_URL: jdbc:mysql://ecommerce-db:3306/ecommercedb?user=root&password=nuuts&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: ecommerce-db-sys
+      SPRING_DATASOURCE_PASSWORD: test1234
+    healthcheck:
+      test: curl -Is localhost:8080/api | head -n 1 | grep 302 || exit 1
+    networks:
+      # Networks to join (Services on the same network can communicate with each other using their name)
+      - ecommerce-network
+  frontend:
+    # Configuration for building the docker image for the backend service
+    build:
+      context: ./ecommerce-vuejs/ # Use an image built from the specified dockerfile in the directory.
+      dockerfile: Dockerfile
+    container_name: ecommerce-frontend
+    ports:
+      - "8081:8080" # Forward the exposed port 8080 on the container to port 8081 on the host machine
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      # Networks to join (Services on the same network can communicate with each other using their name)
+      - ecommerce-network
+# Volumes
+volumes:
+  db-data: # Networks to be created to facilitate communication between containers
+networks:
+  ecommerce-network:
