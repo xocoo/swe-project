@@ -1,7 +1,7 @@
 # Software Engineering course
 
 ## Online shop project
-
+![Home Page](/SWE-eShop-project.png)
 ### Problem Statement/Description
 With the development of the Internet, more and more people will choose to shop online. This online shopping system is designed to meet people's online shopping needs. The first is the login interface. There are registration and login functions. Registration can register buyer accounts and seller accounts. There are also two modes of login. In the seller mode, you can browse the shops and purchase products. If you see the right product, you can put it in the shopping cart. When an order needs to be placed, the goods in the shopping cart will be put into the order, input relevant information and pay. You can then view the order information through the function of viewing the order information. The seller will also receive orders and obtain order information at this time. When you log in in the seller mode/admin mode, you can add and remove products, adjust product prices, and view order information.
 
